@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Coffee Station — XR Simulation Documentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Libre+Baskerville:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f5ede0;
+    --espresso: #1a0f07;
+    --coffee: #3b1f0e;
+    --gold: #c9943a;
+    --gold-light: #e8b96a;
+    --latte: #8c5e35;
+    --foam: #f0e4d0;
+    --dark-bg: #120a04;
+    --mid-bg: #1f1108;
+    --green: #3d7a4f;
+    --green-light: #5aad72;
+    --text-body: #d4b896;
+    --text-dim: #7a5c3e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--dark-bg);
+    color: var(--cream);
+    font-family: 'Libre Baskerville', Georgia, serif;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.5;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    position: relative;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,148,58,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 80% at 80% 100%, rgba(59,31,14,0.8) 0%, transparent 60%),
+      var(--dark-bg);
+    border-bottom: 1px solid rgba(201,148,58,0.15);
+    overflow: hidden;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 1px; height: 80px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.2s;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 9vw, 7rem);
+    font-weight: 900;
+    line-height: 1.0;
+    color: var(--cream);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.9s ease forwards 0.4s;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+
+  .hero-subtitle {
+    font-family: 'Libre Baskerville', serif;
+    font-style: italic;
+    font-size: clamp(1rem, 2.5vw, 1.3rem);
+    color: var(--text-body);
+    max-width: 560px;
+    line-height: 1.7;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 0.6s;
+  }
+
+  .badge-row {
+    display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center;
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 0.8s;
+  }
+
+  .badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid rgba(201,148,58,0.4);
+    color: var(--gold);
+    padding: 0.45rem 1rem;
+    border-radius: 2px;
+    background: rgba(201,148,58,0.05);
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(18,10,4,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(201,148,58,0.12);
+    padding: 1rem 2rem;
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  nav a {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  nav a:hover { color: var(--gold-light); }
+
+  /* ── SECTIONS ── */
+  section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 6rem 2rem;
+    border-bottom: 1px solid rgba(201,148,58,0.07);
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    max-width: 80px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.3;
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 2rem;
+    color: var(--cream);
+  }
+
+  h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    margin-bottom: 0.75rem;
+  }
+
+  p {
+    color: var(--text-body);
+    line-height: 1.85;
+    font-size: 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  /* ── OVERVIEW GRID ── */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  @media (max-width: 640px) { .overview-grid { grid-template-columns: 1fr; } }
+
+  .overview-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(201,148,58,0.12);
+    padding: 2rem;
+    border-radius: 4px;
+    transition: border-color 0.3s, background 0.3s;
+  }
+
+  .overview-card:hover {
+    border-color: rgba(201,148,58,0.35);
+    background: rgba(201,148,58,0.04);
+  }
+
+  .card-icon {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+
+  /* ── GAMEPLAY LOOP ── */
+  .loop-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 2rem;
+    position: relative;
+  }
+
+  .loop-step {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    padding: 1.5rem 0;
+    position: relative;
+  }
+
+  .step-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: rgba(201,148,58,0.2);
+    line-height: 1;
+    min-width: 3rem;
+    text-align: right;
+  }
+
+  .step-content { flex: 1; }
+
+  .step-content h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.4rem;
+  }
+
+  .step-content p { margin-bottom: 0; font-size: 0.95rem; }
+
+  .loop-step + .loop-step {
+    border-top: 1px solid rgba(201,148,58,0.06);
+  }
+
+  /* ── INTERESTING INTERACTIONS ── */
+  .interactions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .interaction-card {
+    background: linear-gradient(135deg, rgba(201,148,58,0.05), rgba(255,255,255,0.02));
+    border: 1px solid rgba(201,148,58,0.15);
+    border-radius: 4px;
+    padding: 1.8rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, border-color 0.3s;
+  }
+
+  .interaction-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(201,148,58,0.4);
+  }
+
+  .interaction-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(to right, var(--gold), transparent);
+  }
+
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--green-light);
+    background: rgba(61,122,79,0.15);
+    border: 1px solid rgba(90,173,114,0.2);
+    padding: 0.25rem 0.6rem;
+    border-radius: 2px;
+    display: inline-block;
+    margin-bottom: 0.8rem;
+  }
+
+  /* ── CODE LINK ── */
+  .code-link-box {
+    margin-top: 2rem;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(201,148,58,0.15);
+    border-radius: 4px;
+    padding: 2rem 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .code-link-box .mono {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--gold-light);
+    letter-spacing: 0.05em;
+    flex: 1;
+    word-break: break-all;
+  }
+
+  .btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: var(--gold);
+    color: var(--espresso);
+    border: none;
+    padding: 0.75rem 1.8rem;
+    cursor: pointer;
+    border-radius: 2px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.2s, transform 0.2s;
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .btn:hover {
+    background: var(--gold-light);
+    transform: translateY(-2px);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+  }
+
+  .btn-outline:hover {
+    background: rgba(201,148,58,0.1);
+    color: var(--gold-light);
+    border-color: var(--gold-light);
+  }
+
+  /* ── SCREENSHOTS ── */
+  .screenshots-intro {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+    margin-bottom: 3rem;
+  }
+
+  @media (max-width: 640px) { .screenshots-intro { grid-template-columns: 1fr; } }
+
+  .gallery-full {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 8px;
+  }
+
+  .gallery-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 3px;
+    border: 1px solid rgba(201,148,58,0.1);
+    cursor: zoom-in;
+    background: var(--mid-bg);
+    height: 210px;
+  }
+
+  .gallery-item:hover { border-color: rgba(201,148,58,0.5); }
+
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    display: block;
+    transition: transform 0.4s ease, filter 0.3s ease;
+    filter: brightness(0.88) saturate(0.88);
+  }
+
+  .gallery-item:hover img {
+    transform: scale(1.04);
+    filter: brightness(1.05) saturate(1.1);
+  }
+
+  .gallery-caption {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 0.5rem 0.75rem;
+    background: linear-gradient(to top, rgba(12,6,2,0.96) 0%, transparent 100%);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+
+  .gallery-item:hover .gallery-caption { opacity: 1; }
+
+  /* Full-width editor views */
+  .gi-full {
+    grid-column: 1 / -1;
+    height: 260px;
+  }
+
+  /* Three equal columns row */
+  .gi-third {
+    grid-column: span 1;
+  }
+
+  @media (max-width: 700px) {
+    .gallery-full { grid-template-columns: 1fr; }
+    .gallery-item, .gi-full { grid-column: 1; height: 180px; }
+  }
+
+  /* ── VIDEO ── */
+  .video-section {
+    background: linear-gradient(135deg, rgba(201,148,58,0.04), rgba(255,255,255,0.01));
+    border: 1px solid rgba(201,148,58,0.12);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 2.5rem;
+  }
+
+  .video-placeholder {
+    aspect-ratio: 16/9;
+    background:
+      repeating-linear-gradient(
+        -45deg,
+        rgba(201,148,58,0.03) 0px,
+        rgba(201,148,58,0.03) 1px,
+        transparent 1px,
+        transparent 20px
+      ),
+      var(--mid-bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    border-bottom: 1px solid rgba(201,148,58,0.1);
+  }
+
+  .play-icon {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    border: 2px solid rgba(201,148,58,0.5);
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(201,148,58,0.08);
+    transition: background 0.3s, border-color 0.3s;
+    cursor: pointer;
+  }
+
+  .play-icon:hover {
+    background: rgba(201,148,58,0.15);
+    border-color: var(--gold);
+  }
+
+  .play-icon svg { margin-left: 5px; }
+
+  .video-info-bar {
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .video-info-bar .v-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--cream);
+  }
+
+  .video-info-bar .v-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  /* Actual embed version */
+  .video-embed-wrapper {
+    position: relative;
+    aspect-ratio: 16/9;
+    background: #000;
+  }
+
+  .video-embed-wrapper iframe,
+  .video-embed-wrapper video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* ── TECH STACK ── */
+  .tech-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .tech-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    border: 1px solid rgba(201,148,58,0.25);
+    color: var(--text-body);
+    padding: 0.5rem 1.1rem;
+    border-radius: 100px;
+    background: rgba(201,148,58,0.04);
+  }
+
+  /* ── CODE SNIPPET ── */
+  pre {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(201,148,58,0.12);
+    border-left: 3px solid var(--gold);
+    border-radius: 4px;
+    padding: 1.5rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: var(--foam);
+  }
+
+  .kw { color: #e8b96a; }
+  .fn { color: #8fc9a0; }
+  .cm { color: #5a4a35; font-style: italic; }
+  .str { color: #b8956a; }
+
+  /* ── CHALLENGES ── */
+  .challenge-list {
+    list-style: none;
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  .challenge-list li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(201,148,58,0.08);
+    border-radius: 4px;
+    align-items: start;
+  }
+
+  .challenge-icon {
+    font-size: 1.2rem;
+    margin-top: 2px;
+  }
+
+  .challenge-text strong {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    margin-bottom: 0.4rem;
+  }
+
+  .challenge-text p { margin-bottom: 0; font-size: 0.9rem; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 4rem 2rem;
+    border-top: 1px solid rgba(201,148,58,0.1);
+  }
+
+  footer .f-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-style: italic;
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+  }
+
+  footer p {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  /* ── LIGHTBOX ── */
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,5,2,0.95);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    cursor: zoom-out;
+  }
+
+  .lightbox.open { display: flex; }
+
+  .lightbox img {
+    max-width: 90vw;
+    max-height: 88vh;
+    object-fit: contain;
+    border: 1px solid rgba(201,148,58,0.2);
+    border-radius: 4px;
+  }
+
+  .lightbox-close {
+    position: fixed;
+    top: 1.5rem; right: 2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── DIVIDER ── */
+  .ornament {
+    text-align: center;
+    color: rgba(201,148,58,0.3);
+    font-size: 1.2rem;
+    letter-spacing: 1rem;
+    margin: 1rem 0 2.5rem;
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <p class="hero-eyebrow">XR Simulation — Unity · 2026</p>
+  <h1 class="hero-title">The Coffee<br><em>Station</em></h1>
+  <p class="hero-subtitle">An immersive XR experience where players learn to brew coffee step-by-step using virtual reality interactions and a fully simulated espresso machine.</p>
+  <div class="badge-row">
+    <span class="badge">Unity</span>
+    <span class="badge">XR Interaction Toolkit</span>
+    <span class="badge">C#</span>
+    <span class="badge">TextMeshPro</span>
+    <span class="badge">XR Device Simulator</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="#overview">Overview</a>
+  <a href="#loop">Gameplay Loop</a>
+  <a href="#interactions">Interactions</a>
+  <a href="#screenshots">Screenshots</a>
+  <a href="#video">Video</a>
+  <a href="#technical">Technical</a>
+  <a href="#challenges">Challenges</a>
+</nav>
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <div class="section-label">01 — Project</div>
+  <h2>Brief Description</h2>
+  <p>The Coffee Station is an interactive XR experience designed to teach users the correct sequence of making coffee using a virtual espresso machine. Built in Unity, it guides users through grabbing ingredients, placing them into the machine, brewing, and finally serving a cup to a waiting guest — all within a richly detailed café environment.</p>
+  <p>The simulation prioritizes <em>guided interaction over open exploration</em> — every action produces visible, satisfying feedback, and fail-safe systems prevent softlocks or broken states, making it accessible to first-time XR users.</p>
+
+  <div class="overview-grid reveal">
+    <div class="overview-card">
+      <div class="card-icon">🎯</div>
+      <h3>Objective</h3>
+      <p>Teach users a structured coffee-making sequence while introducing core XR mechanics: grabbing, placing, and pressing in a physically-grounded environment.</p>
+    </div>
+    <div class="overview-card">
+      <div class="card-icon">🏗️</div>
+      <h3>Platform</h3>
+      <p>Unity 3D with XR Interaction Toolkit. Tested with the XR Device Simulator for desktop development and compatible with VR headsets.</p>
+    </div>
+    <div class="overview-card">
+      <div class="card-icon">👤</div>
+      <h3>Audience</h3>
+      <p>Beginners to XR. The experience is designed to be immediately understandable without prior VR experience, using clear in-world text prompts.</p>
+    </div>
+    <div class="overview-card">
+      <div class="card-icon">⏱️</div>
+      <h3>Session Length</h3>
+      <p>A single run takes approximately 2 minutes. A Replay Training button allows immediate repetition for skill reinforcement.</p>
+    </div>
+  </div>
+
+  <!-- CODE LINKS -->
+  <div style="margin-top: 3rem;">
+    <div class="section-label">Code & Resources</div>
+    <div class="code-link-box reveal">
+      <div>
+        <div class="mono">📁 CoffeeMachineSimple.cs — Core state machine for brewing logic</div>
+        <div class="mono" style="margin-top:0.4rem;">📁 GuestTrigger.cs — Delivery detection &amp; completion panel</div>
+      </div>
+      <a href="https://github.com/Jkr81/CIM423-Project-1/tree/main/CIM423/Assets/Coffee%20Files" target="_blank" class="btn btn-outline">View Repository →</a>
+    </div>
+  </div>
+</section>
+
+<!-- GAMEPLAY LOOP -->
+<section id="loop">
+  <div class="section-label">02 — Core Loop</div>
+  <h2>How It Plays</h2>
+  <p>The simulation follows a tight, satisfying loop with a clear start and end. Every step is gated — the player cannot proceed without completing the previous one.</p>
+  <div class="ornament">· · ·</div>
+
+  <div class="loop-steps reveal">
+    <div class="loop-step">
+      <div class="step-num">01</div>
+      <div class="step-content">
+        <h4>Welcome Panel</h4>
+        <p>Player faces the intro panel in the café. Controller diagram and keybindings are displayed. A large "Press Begin" button unlocks the session.</p>
+      </div>
+    </div>
+    <div class="loop-step">
+      <div class="step-num">02</div>
+      <div class="step-content">
+        <h4>Gather Ingredients</h4>
+        <p>Player grabs the water container and coffee beans from the counter using the Grip button. Objects are highlighted and grabbable via XR Interaction Toolkit.</p>
+      </div>
+    </div>
+    <div class="loop-step">
+      <div class="step-num">03</div>
+      <div class="step-content">
+        <h4>Load the Machine</h4>
+        <p>Ingredients are placed into the machine's designated zones. The machine tracks hasWater, hasBeans, and hasCup states internally.</p>
+      </div>
+    </div>
+    <div class="loop-step">
+      <div class="step-num">04</div>
+      <div class="step-content">
+        <h4>Brew</h4>
+        <p>With all conditions met, the player presses the red brew button. The button glows yellow during brewing, then turns green — "Coffee done!" appears in the console overlay.</p>
+      </div>
+    </div>
+    <div class="loop-step">
+      <div class="step-num">05</div>
+      <div class="step-content">
+        <h4>Serve the Guest</h4>
+        <p>Player picks up the finished cup and walks it to the waiting café guest. A trigger zone detects delivery.</p>
+      </div>
+    </div>
+    <div class="loop-step">
+      <div class="step-num">06</div>
+      <div class="step-content">
+        <h4>Shift Complete</h4>
+        <p>"Shift Complete" panel appears summarizing what was learned. Player can hit Replay Training to restart the full loop.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTERESTING INTERACTIONS -->
+<section id="interactions">
+  <div class="section-label">03 — Highlight</div>
+  <h2>Interesting Interactions</h2>
+  <p>Several design choices make this simulation stand out from a generic XR tutorial. Each feature below represents a deliberate decision to improve user experience and prevent frustration.</p>
+
+  <div class="interactions-grid reveal">
+    <div class="interaction-card">
+      <span class="tag">State Machine</span>
+      <h3>Gated Brewing Logic</h3>
+      <p>The machine maintains a live state for water, beans, and cup. Brewing is impossible unless all three are present — and once brewed, a boolean lock prevents any repeat action. This prevents exploitation and reinforces the correct sequence.</p>
+    </div>
+    <div class="interaction-card">
+      <span class="tag">Fail-Safe</span>
+      <h3>Object Respawn System</h3>
+      <p>Every interactable object stores its original world transform at startup. If it falls off the counter or out of bounds, it silently teleports back — no softlocks, no frustration, no restart needed.</p>
+    </div>
+    <div class="interaction-card">
+      <span class="tag">Visual Feedback</span>
+      <h3>Dynamic Button Color</h3>
+      <p>The brew button cycles through three meaningful states: red (idle/locked), yellow with glow (brewing in progress), and bright green (coffee ready). The color shift is immediately readable even in VR peripheral vision.</p>
+    </div>
+    <div class="interaction-card">
+      <span class="tag">World-Space UI</span>
+      <h3>Diegetic Instruction Panels</h3>
+      <p>Instructions live inside the world as floating panels — not as HUD overlays. This preserves immersion while keeping guidance clear. The intro and completion panels are interactable XR objects themselves.</p>
+    </div>
+    <div class="interaction-card">
+      <span class="tag">Audio</span>
+      <h3>Brewing Sound Feedback</h3>
+      <p>An espresso machine sound plays during the brew coroutine, bridging the gap between button press and result. The temporal audio cue signals that the machine is working and builds anticipation.</p>
+    </div>
+    <div class="interaction-card">
+      <span class="tag">Guest NPC</span>
+      <h3>Delivery Trigger Zone</h3>
+      <p>The GuestTrigger.cs script wraps the guest character in an invisible trigger zone. Only when coffee is ready AND the cup enters the zone does the completion sequence fire — preventing accidental triggers.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SCREENSHOTS -->
+<section id="screenshots">
+  <div class="section-label">04 — Screenshots</div>
+  <h2>Visual Walkthrough</h2>
+  <p>From the welcome panel to the completion screen — a full visual gallery of the simulation in action, captured inside Unity's play mode Simulator.</p>
+
+  <div class="gallery-full reveal" style="margin-top: 2rem;">
+
+    <!-- Row 1: portrait UI + wide XR welcome -->
+    <div class="gallery-item" onclick="openLightbox(this)">
+      <img src="welcome panel.jpg" alt="Welcome Panel UI" loading="lazy">
+      <div class="gallery-caption">Welcome Panel UI</div>
+    </div>
+    <div class="gallery-item" onclick="openLightbox(this)">
+      <img src="welcome in xr.jpg" alt="Welcome Panel in XR" loading="lazy">
+      <div class="gallery-caption">Welcome Panel — In XR</div>
+    </div>
+
+    <!-- Row 2: portrait Shift Complete UI + wide gameplay instructions -->
+    <div class="gallery-item" onclick="openLightbox(this)">
+      <img src="shift complete.jpg" alt="Shift Complete UI" loading="lazy">
+      <div class="gallery-caption">Shift Complete UI</div>
+    </div>
+    <div class="gallery-item" onclick="openLightbox(this)">
+      <img src="instructions floor.jpg" alt="Gameplay Overview" loading="lazy">
+      <div class="gallery-caption">Gameplay — Step Instructions</div>
+    </div>
+
+    <!-- Row 3: portrait Shift Complete in XR + wide red button -->
+    <div class="gallery-item" onclick="openLightbox(this)">
+      <img src="shift complete in xr.jpg" alt="Shift Complete in XR" loading="lazy">
+      <div class="gallery-caption">Shift Complete — In XR</div>
+    </div>
+    <div class="gallery-item" onclick="openLightbox(this)">
+      <img src="red.jpg" alt="Red Button Idle" loading="lazy">
+      <div class="gallery-caption">Red Button (Idle)</div>
+    </div>
+
+    <!-- Row 4: full-width brewing states — 3 equal cols using subgrid trick -->
+    <div class="gallery-item gi-full" style="height:auto; display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; background:transparent; border:none; border-radius:0;">
+      <div class="gallery-item" style="height:210px;" onclick="openLightbox(this)">
+        <img src="yellow.jpg" alt="Yellow Button Brewing" loading="lazy">
+        <div class="gallery-caption">Yellow (Brewing)</div>
+      </div>
+      <div class="gallery-item" style="height:210px;" onclick="openLightbox(this)">
+        <img src="green.jpg" alt="Green Button Done" loading="lazy">
+        <div class="gallery-caption">Green (Done)</div>
+      </div>
+      <div class="gallery-item" style="height:210px;" onclick="openLightbox(this)">
+        <img src="front overwiew.jpg" alt="Unity Editor Front View" loading="lazy">
+        <div class="gallery-caption">Editor — Front View</div>
+      </div>
+    </div>
+
+    <!-- Row 5: full-width back editor view -->
+    <div class="gallery-item gi-full" onclick="openLightbox(this)">
+      <img src="back overview.jpg" alt="Unity Editor Full Café" loading="lazy">
+      <div class="gallery-caption">Unity Editor — Full Café</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- VIDEO -->
+<section id="video">
+  <div class="section-label">05 — Walkthrough</div>
+  <h2>Video Documentation</h2>
+  <p>A recorded walkthrough of the full simulation — from "Pressing Begin" to the "Shift Complete" screen.</p>
+
+  <div class="video-section reveal">
+    <!-- 
+      TO EMBED YOUR VIDEO: Replace the placeholder below with ONE of:
+      
+      Option A — YouTube:
+      <div class="video-embed-wrapper">
+        <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID" allowfullscreen></iframe>
+      </div>
+      
+      Option B — Local file:
+      <div class="video-embed-wrapper">
+        <video controls>
+          <source src="your-video.mp4" type="video/mp4">
+        </video>
+      </div>
+    -->
+    <div class="video-embed-wrapper">
+      <iframe src="https://www.youtube.com/embed/XBEVqHSuZtE" allowfullscreen></iframe>
+    </div>
+    <div class="video-info-bar">
+      <div class="v-title">The Coffee Station — Full Run</div>
+      <div class="v-meta">XR Device Simulator · Unity 2026 · ~2 min</div>
+    </div>
+  </div>
+</section>
+
+<!-- TECHNICAL -->
+<section id="technical">
+  <div class="section-label">06 — Technical</div>
+  <h2>Implementation</h2>
+
+  <p>Built in Unity, the simulation relies on two primary C# scripts and a set of Unity components for physics, audio, and UI. All XR interactions leverage the toolkit's built-in Interactable and Interactor system.</p>
+
+  <div class="tech-grid reveal">
+    <span class="tech-pill">Unity (XR Setup)</span>
+    <span class="tech-pill">C# Scripting</span>
+    <span class="tech-pill">XR Interaction Toolkit</span>
+    <span class="tech-pill">TextMeshPro</span>
+    <span class="tech-pill">XR Simple Interactable</span>
+    <span class="tech-pill">Ray Interactor</span>
+    <span class="tech-pill">Coroutines</span>
+    <span class="tech-pill">World-Space Canvas</span>
+    <span class="tech-pill">AudioSource</span>
+    <span class="tech-pill">ParticleSystem</span>
+    <span class="tech-pill">Rigidbody / Colliders</span>
+    <span class="tech-pill">XR Device Simulator</span>
+  </div>
+
+  <div style="margin-top: 3rem;">
+    <h3>Core Brewing Logic — CoffeeMachineSimple.cs</h3>
+    <p>The machine checks all required states before allowing the brew coroutine to start. Once fired, a boolean lock prevents any further brewing until the scene is reset.</p>
+    <pre><span class="cm">// Only brew if ingredients are present and not already brewing</span>
+<span class="kw">if</span> (hasWater && hasBeans && hasCup && !isBrewing)
+{
+    <span class="fn">StartCoroutine</span>(<span class="fn">BrewCoffee</span>());
+}
+
+<span class="kw">private</span> IEnumerator <span class="fn">BrewCoffee</span>()
+{
+    isBrewing = <span class="kw">true</span>;
+    brewButton.color = Color.yellow;       <span class="cm">// visual feedback</span>
+    audioSource.<span class="fn">Play</span>();                   <span class="cm">// brewing sound</span>
+    <span class="kw">yield return new</span> WaitForSeconds(3f);
+    coffeeReady = <span class="kw">true</span>;
+    brewButton.color = Color.green;        <span class="cm">// done!</span>
+    Debug.<span class="fn">Log</span>(<span class="str">"Coffee done!"</span>);
+}</pre>
+  </div>
+
+  <div style="margin-top: 2rem;">
+    <h3>Delivery Detection — GuestTrigger.cs</h3>
+    <p>A trigger collider on the guest NPC fires only when the cup enters its zone AND the machine has set coffeeReady to true. A triggered boolean prevents the completion panel from firing more than once.</p>
+  </div>
+</section>
+
+<!-- CHALLENGES -->
+<section id="challenges">
+  <div class="section-label">07 — Challenges</div>
+  <h2>Problems & Solutions</h2>
+  <p>Five core issues emerged during development, each resolved through iteration and targeted design changes.</p>
+
+  <ul class="challenge-list reveal">
+    <li>
+      <div class="challenge-icon">🔄</div>
+      <div class="challenge-text">
+        <strong>Objects falling out of bounds</strong>
+        <p>Implemented a respawn system that stores each object's original world transform at Awake() and resets position when it falls below a threshold Y value. No restarts needed.</p>
+      </div>
+    </li>
+    <li>
+      <div class="challenge-icon">🎮</div>
+      <div class="challenge-text">
+        <strong>XR buttons not responding</strong>
+        <p>Switched from custom collider-based buttons to XR Simple Interactable components. Ensured the Ray Interactor was active and that all button objects had properly configured colliders.</p>
+      </div>
+    </li>
+    <li>
+      <div class="challenge-icon">💧</div>
+      <div class="challenge-text">
+        <strong>Water not staying in cup</strong>
+        <p>Removed conflicting Rigidbody components from the water object and made it a child of the cup transform, so it moves naturally with the cup during pickup and placement.</p>
+      </div>
+    </li>
+    <li>
+      <div class="challenge-icon">📋</div>
+      <div class="challenge-text">
+        <strong>Completion panel not appearing</strong>
+        <p>Panel was left enabled in the scene. Switched to setting it inactive in Awake() and activating it programmatically only after the delivery trigger fires correctly.</p>
+      </div>
+    </li>
+    <li>
+      <div class="challenge-icon">🔒</div>
+      <div class="challenge-text">
+        <strong>Multiple brewing attempts</strong>
+        <p>Added an isBrewing boolean that is set to true at the start of the coroutine. Subsequent button presses check this flag first and exit early if brewing has already occurred.</p>
+      </div>
+    </li>
+  </ul>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="f-title">The Coffee Station</div>
+  <p>XR Coffee Simulation · Unity · 2026</p>
+  <p style="margin-top:0.5rem;">Designed & Built for XR Interactions</p>
+</footer>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div class="lightbox-close">Close ✕</div>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<script>
+  // Lightbox
+  function openLightbox(el) {
+    const img = el.querySelector('img');
+    document.getElementById('lightbox-img').src = img.src;
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.08 });
+  reveals.forEach(r => io.observe(r));
+</script>
+
+</body>
+</html>

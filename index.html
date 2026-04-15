@@ -381,6 +381,107 @@
     border-color: var(--gold-light);
   }
 
+  /* ── APK DOWNLOAD ── */
+  .apk-download-box {
+    margin-top: 1.5rem;
+    background: linear-gradient(135deg, rgba(61,122,79,0.08), rgba(255,255,255,0.02));
+    border: 1px solid rgba(90,173,114,0.25);
+    border-radius: 4px;
+    padding: 2rem 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, background 0.3s;
+  }
+
+  .apk-download-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(to right, var(--green-light), transparent);
+  }
+
+  .apk-download-box:hover {
+    border-color: rgba(90,173,114,0.5);
+    background: linear-gradient(135deg, rgba(61,122,79,0.13), rgba(255,255,255,0.03));
+  }
+
+  .apk-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .apk-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--green-light);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .apk-label::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green-light);
+    box-shadow: 0 0 6px var(--green-light);
+  }
+
+  .apk-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--cream);
+    letter-spacing: 0.05em;
+  }
+
+  .apk-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+  }
+
+  .btn-apk {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: var(--green);
+    color: #d4f0de;
+    border: 1px solid rgba(90,173,114,0.4);
+    padding: 0.75rem 1.8rem;
+    cursor: pointer;
+    border-radius: 2px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.2s, transform 0.2s, border-color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+  }
+
+  .btn-apk:hover {
+    background: #4e9e65;
+    border-color: var(--green-light);
+    transform: translateY(-2px);
+  }
+
+  .btn-apk svg {
+    flex-shrink: 0;
+  }
+
   /* ── SCREENSHOTS ── */
   .screenshots-intro {
     display: grid;
@@ -760,6 +861,8 @@
   <!-- CODE LINKS -->
   <div style="margin-top: 3rem;">
     <div class="section-label">Code & Resources</div>
+
+    <!-- Repository Link -->
     <div class="code-link-box reveal">
       <div>
         <div class="mono">📁 CoffeeMachineSimple.cs — Core state machine for brewing logic</div>
@@ -767,6 +870,24 @@
       </div>
       <a href="https://github.com/Jkr81/CIM423-Project-1/tree/main/CIM423/Assets/Coffee%20Files" target="_blank" class="btn btn-outline">View Repository →</a>
     </div>
+
+    <!-- APK Download -->
+    <div class="apk-download-box reveal">
+      <div class="apk-info">
+        <span class="apk-label">Android Build — Ready to Install</span>
+        <span class="apk-title">TheCoffeeStation.apk</span>
+        <span class="apk-meta">Meta Quest / Android XR · Unity 2026 · Requires XR-capable device</span>
+      </div>
+      <a href="CoffeeSim.apk" download class="btn-apk">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Download APK
+      </a>
+    </div>
+
   </div>
 </section>
 
@@ -933,21 +1054,6 @@
   <p>A recorded walkthrough of the full simulation — from "Pressing Begin" to the "Shift Complete" screen.</p>
 
   <div class="video-section reveal">
-    <!-- 
-      TO EMBED YOUR VIDEO: Replace the placeholder below with ONE of:
-      
-      Option A — YouTube:
-      <div class="video-embed-wrapper">
-        <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID" allowfullscreen></iframe>
-      </div>
-      
-      Option B — Local file:
-      <div class="video-embed-wrapper">
-        <video controls>
-          <source src="your-video.mp4" type="video/mp4">
-        </video>
-      </div>
-    -->
     <div class="video-embed-wrapper">
       <iframe src="https://www.youtube.com/embed/XBEVqHSuZtE" allowfullscreen></iframe>
     </div>

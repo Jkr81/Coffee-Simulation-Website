@@ -812,7 +812,7 @@
     <span class="badge">Unity</span>
     <span class="badge">XR Interaction Toolkit</span>
     <span class="badge">C#</span>
-    <span class="badge">GitHub</span>
+    <span class="badge">TextMeshPro</span>
     <span class="badge">XR Device Simulator</span>
   </div>
 </div>
@@ -862,30 +862,41 @@
   <div style="margin-top: 3rem;">
     <div class="section-label">Code & Resources</div>
 
-    <!-- Repository Link -->
-    <div class="code-link-box reveal">
+    <!-- Files info -->
+    <div class="code-link-box reveal" style="margin-bottom: 0; border-bottom: none; border-radius: 4px 4px 0 0;">
       <div>
         <div class="mono">📁 CoffeeMachineSimple.cs — Core state machine for brewing logic</div>
         <div class="mono" style="margin-top:0.4rem;">📁 GuestTrigger.cs — Delivery detection &amp; completion panel</div>
       </div>
-      <a href="https://github.com/Jkr81/CIM423-Project-1/tree/main/CIM423/Assets/Coffee%20Files" target="_blank" class="btn btn-outline">View Repository →</a>
     </div>
 
-    <!-- APK Download -->
-    <div class="apk-download-box reveal">
-      <div class="apk-info">
-        <span class="apk-label">Android Build — Ready to Install</span>
-        <span class="apk-title">CoffeeSim.apk</span>
-        <span class="apk-meta">Meta Quest / Android XR · Unity 2026 · Requires XR-capable device</span>
-      </div>
-      <a href="https://github.com/Jkr81/Coffee-Simulation-Website/releases/download/v1.0/CoffeeSim.apk" download class="btn-apk">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Button row -->
+    <div class="reveal" style="display: flex; gap: 0; border: 1px solid rgba(201,148,58,0.15); border-top: none; border-radius: 0 0 4px 4px; overflow: hidden;">
+
+      <!-- Repo button -->
+      <a href="https://github.com/Jkr81/CIM423-Project-1/tree/main/CIM423/Assets/Coffee%20Files" target="_blank"
+         style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.6rem; padding: 1.1rem 1.5rem; background: transparent; color: var(--gold); border: none; border-right: 1px solid rgba(201,148,58,0.15); font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; text-decoration: none; transition: background 0.2s, color 0.2s;"
+         onmouseover="this.style.background='rgba(201,148,58,0.08)'; this.style.color='var(--gold-light)'"
+         onmouseout="this.style.background='transparent'; this.style.color='var(--gold)'">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+        </svg>
+        View Repository →
+      </a>
+
+      <!-- APK button -->
+      <a href="https://github.com/Jkr81/Coffee-Simulation-Website/releases/download/v1.0/CoffeeSim.apk" download
+         style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.6rem; padding: 1.1rem 1.5rem; background: rgba(61,122,79,0.08); color: var(--green-light); border: none; font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; text-decoration: none; transition: background 0.2s, color 0.2s;"
+         onmouseover="this.style.background='rgba(61,122,79,0.18)'; this.style.color='#7dd99a'"
+         onmouseout="this.style.background='rgba(61,122,79,0.08)'; this.style.color='var(--green-light)'">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
           <polyline points="7 10 12 15 17 10"/>
           <line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
         Download APK
       </a>
+
     </div>
 
   </div>
@@ -1075,7 +1086,7 @@
     <span class="tech-pill">Unity (XR Setup)</span>
     <span class="tech-pill">C# Scripting</span>
     <span class="tech-pill">XR Interaction Toolkit</span>
-    <span class="tech-pill">GitHub</span>
+    <span class="tech-pill">TextMeshPro</span>
     <span class="tech-pill">XR Simple Interactable</span>
     <span class="tech-pill">Ray Interactor</span>
     <span class="tech-pill">Coroutines</span>
